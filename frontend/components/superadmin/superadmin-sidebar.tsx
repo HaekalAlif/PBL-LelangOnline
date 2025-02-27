@@ -15,6 +15,10 @@ import {
   Bell,
   ChevronRight,
   LayoutDashboard,
+  PieChart,
+  Settings,
+  BarChart3,
+  ClipboardList,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -31,14 +35,15 @@ import ProfileCard from "@/components/common/profile-card";
 import { useState } from "react";
 import Logout from "@/components/auth/logout";
 
-// Group menu items by category
 const menuGroups = [
   {
     label: "Overview",
+    icon: PieChart,
     items: [{ title: "Dashboard", url: "/superadmin", icon: Home, badge: "" }],
   },
   {
     label: "Management",
+    icon: Settings,
     items: [
       { title: "Users", url: "/superadmin/user", icon: Users, badge: "" },
       { title: "Stores", url: "/superadmin/toko", icon: Store, badge: "" },
@@ -58,6 +63,7 @@ const menuGroups = [
   },
   {
     label: "Auction",
+    icon: Gavel,
     items: [
       { title: "Auctions", url: "/superadmin/lelang", icon: Gavel, badge: "" },
       {
@@ -70,6 +76,7 @@ const menuGroups = [
   },
   {
     label: "Operations",
+    icon: BarChart3,
     items: [
       {
         title: "Transactions",
@@ -134,6 +141,7 @@ export function AppSidebar() {
                   )}
                 >
                   <div className="flex items-center gap-2">
+                    <group.icon className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm font-medium">{group.label}</span>
                   </div>
                   <ChevronRight
@@ -185,7 +193,6 @@ export function AppSidebar() {
           ))}
         </div>
       </ScrollArea>
-
       <div className="mt-auto border-t bg-accent/5 p-4">
         <Logout />
       </div>

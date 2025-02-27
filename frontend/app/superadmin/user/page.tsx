@@ -27,6 +27,20 @@ import {
 } from "@/components/ui/select";
 import { MoreHorizontal, Plus, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Card, CardContent } from "@/components/ui/card";
+import { Users, UserCheck } from "lucide-react";
+import axios from "@/lib/axios";
+import { toast } from "sonner";
 
 interface User {
   id_user: number;
@@ -45,6 +59,9 @@ export default function UserPage() {
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -59,21 +76,72 @@ export default function UserPage() {
 
   const fetchUsers = async () => {
     try {
-      let url = `${process.env.NEXT_PUBLIC_API_URL}/users?`;
-      if (search) url += `search=${search}&`;
-      if (roleFilter !== "all") url += `role=${roleFilter}&`;
-      if (statusFilter !== "all") url += `status=${statusFilter}`;
+      const userId = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("id_user="))
+        ?.split("=")[1];
 
-      const response = await fetch(url);
-      const data = await response.json();
-      if (data.status === "success") {
-        setUsers(data.data);
+      if (!userId) {
+        console.log("User ID not found in cookies");
+        router.push("/login");
+        return;
       }
-    } catch (error) {
-      console.error("Error fetching users:", error);
+
+      const response = await axios.get("/users", {
+        headers: {
+          "X-User-Id": userId,
+        },
+        params: {
+          search: search || undefined,
+          role: roleFilter !== "all" ? roleFilter : undefined,
+          status: statusFilter !== "all" ? statusFilter : undefined,
+        },
+      });
+
+      if (response.data.status === "success") {
+        setUsers(response.data.data);
+      }
+    } catch (error: any) {
+      console.error("Error fetching users:", error.response?.data);
+      if (error.response?.status === 401) {
+        router.push("/login");
+      }
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDelete = async (user: User) => {
+    try {
+      const response = await axios.delete(`/users/${user.id_user}`);
+      if (response.data.status === "success") {
+        toast.success("User deleted successfully");
+        fetchUsers();
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Failed to delete user");
+    }
+    setDeleteDialogOpen(false);
+  };
+
+  const handleDeactivate = async (user: User) => {
+    try {
+      const response = await axios.put(`/users/${user.id_user}`, {
+        ...user,
+        is_active: !user.is_active,
+      });
+      if (response.data.status === "success") {
+        toast.success(
+          `User ${user.is_active ? "deactivated" : "activated"} successfully`
+        );
+        fetchUsers();
+      }
+    } catch (error: any) {
+      toast.error(
+        error.response?.data?.message || "Failed to update user status"
+      );
+    }
+    setDeactivateDialogOpen(false);
   };
 
   const getRoleName = (role: number) => {
@@ -93,6 +161,38 @@ export default function UserPage() {
 
   return (
     <div className="p-6">
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <Card>
+          <CardContent className="flex items-center p-6">
+            <div className="rounded-full bg-blue-100 p-3">
+              <Users className="h-6 w-6 text-blue-600" />
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-muted-foreground">
+                Total Users
+              </p>
+              <h3 className="text-2xl font-bold">{users.length}</h3>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="flex items-center p-6">
+            <div className="rounded-full bg-green-100 p-3">
+              <UserCheck className="h-6 w-6 text-green-600" />
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-muted-foreground">
+                Active Users
+              </p>
+              <h3 className="text-2xl font-bold">
+                {users.filter((u) => u.is_active).length}
+              </h3>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">User Management</h1>
         <Button type="button">
@@ -204,12 +304,33 @@ export default function UserPage() {
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem
                           onClick={() =>
+                            router.push(`/superadmin/user/${user.id_user}`)
+                          }
+                        >
+                          View Details
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() =>
                             router.push(`/superadmin/user/${user.id_user}/edit`)
                           }
                         >
                           Edit
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="text-red-600">
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setSelectedUser(user);
+                            setDeactivateDialogOpen(true);
+                          }}
+                        >
+                          {user.is_active ? "Deactivate" : "Activate"}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setSelectedUser(user);
+                            setDeleteDialogOpen(true);
+                          }}
+                          className="text-red-600"
+                        >
                           Delete
                         </DropdownMenuItem>
                       </DropdownMenuContent>
@@ -221,6 +342,63 @@ export default function UserPage() {
           </TableBody>
         </Table>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the
+              user account and remove their data from our servers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-600 hover:bg-red-700"
+              onClick={() => {
+                if (selectedUser) {
+                  handleDelete(selectedUser);
+                }
+                setDeleteDialogOpen(false);
+              }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Deactivate Confirmation Dialog */}
+      <AlertDialog
+        open={deactivateDialogOpen}
+        onOpenChange={setDeactivateDialogOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Action</AlertDialogTitle>
+            <AlertDialogDescription>
+              {selectedUser?.is_active
+                ? "Are you sure you want to deactivate this user's account?"
+                : "Are you sure you want to activate this user's account?"}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (selectedUser) {
+                  handleDeactivate(selectedUser);
+                }
+                setDeactivateDialogOpen(false);
+              }}
+            >
+              Confirm
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

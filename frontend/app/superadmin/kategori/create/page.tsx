@@ -21,42 +21,38 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 
 const formSchema = z.object({
-  nama_toko: z.string().min(3, "Store name must be at least 3 characters"),
-  deskripsi: z.string().min(10, "Description must be at least 10 characters"),
-  alamat: z.string().min(5, "Address must be at least 5 characters"),
-  kontak: z.string().min(10, "Contact number must be at least 10 characters"),
+  nama_kategori: z.string().min(3, "Category name must be at least 3 characters"),
+  is_active: z.boolean().default(true),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
-export default function CreateTokoPage() {
+export default function CreateKategoriPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      nama_toko: "",
-      deskripsi: "",
-      alamat: "",
-      kontak: "",
+      nama_kategori: "",
+      is_active: true,
     },
   });
-
 
   const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true);
     try {
-      // Get user data from cookies
-      const cookies = document.cookie.split("; ");
-      const userId = cookies
+      // Get user ID from cookies
+      const userId = document.cookie
+        .split("; ")
         .find((row) => row.startsWith("id_user="))
         ?.split("=")[1];
 
@@ -66,26 +62,26 @@ export default function CreateTokoPage() {
         return;
       }
 
-      // Prepare complete data for store creation
+      // Prepare complete data for category creation
       const completeData = {
         ...data,
-        id_user: parseInt(userId),
         created_by: parseInt(userId),
-        is_active: true,
         is_deleted: false,
       };
 
-      console.log("Submitting data:", completeData); 
-
-      const response = await axios.post("/stores", completeData);
+      const response = await axios.post("/categories", completeData, {
+        headers: {
+          "X-User-Id": userId,
+        },
+      });
 
       if (response.data.status === "success") {
-        toast.success("Store created successfully");
-        router.push("/user/toko");
+        toast.success("Category created successfully");
+        router.push("/superadmin/kategori");
         router.refresh();
       }
     } catch (error: any) {
-      console.error("API Error:", error.response?.data); // Debug log
+      console.error("API Error:", error.response?.data);
 
       if (error.response?.status === 401) {
         toast.error("Please login to continue");
@@ -98,7 +94,7 @@ export default function CreateTokoPage() {
       } else if (error.response?.status === 400) {
         toast.error(error.response.data.message);
       } else {
-        toast.error(error.response?.data?.message || "Failed to create store");
+        toast.error(error.response?.data?.message || "Failed to create category");
       }
     } finally {
       setIsSubmitting(false);
@@ -109,9 +105,9 @@ export default function CreateTokoPage() {
     <div className="container max-w-2xl py-6">
       <Card>
         <CardHeader>
-          <CardTitle>Create Store</CardTitle>
+          <CardTitle>Create Category</CardTitle>
           <CardDescription>
-            Set up your store profile to start selling products
+            Add a new category for products in the auction system
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -119,12 +115,12 @@ export default function CreateTokoPage() {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
                 control={form.control}
-                name="nama_toko"
+                name="nama_kategori"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Store Name</FormLabel>
+                    <FormLabel>Category Name</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input placeholder="Enter category name" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -133,42 +129,21 @@ export default function CreateTokoPage() {
 
               <FormField
                 control={form.control}
-                name="deskripsi"
+                name="is_active"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description</FormLabel>
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                    <div className="space-y-0.5">
+                      <FormLabel className="text-base">Active Status</FormLabel>
+                      <FormDescription>
+                        Set whether this category is active and can be used
+                      </FormDescription>
+                    </div>
                     <FormControl>
-                      <Textarea {...field} />
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
                     </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="alamat"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Address</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="kontak"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Contact Number</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -177,7 +152,7 @@ export default function CreateTokoPage() {
                 {isSubmitting && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
-                Create Store
+                Create Category
               </Button>
             </form>
           </Form>

@@ -23,36 +23,78 @@ const LoginPage: React.FC = () => {
         }
       );
 
-      console.log(response.data);
+      const { user, token } = response.data.data;
 
-      // Set expiration date for 30 minutes
-      const minutesToExpire = 30;
-      const expirationDate = new Date();
-      expirationDate.setTime(
-        expirationDate.getTime() + minutesToExpire * 60 * 1000
-      ); // 30 minutes in milliseconds
-      const expires = `; expires=${expirationDate.toUTCString()}`;
+      // Set secure cookie options
+      const cookieOptions = {
+        expires: new Date(Date.now() + 30 * 60 * 1000), // 30 minutes
+        path: "/",
+        secure: process.env.NODE_ENV === "production", // Only use HTTPS in production
+        sameSite: "strict" as const,
+      };
 
-      // Simpan data user yang diperlukan ke cookies
-      document.cookie = `token=${response.data.data.token}${expires}; path=/`;
-      document.cookie = `id=${response.data.data.user.id_user}${expires}; path=/`;
-      document.cookie = `username=${response.data.data.user.username}${expires}; path=/`;
-      document.cookie = `email=${response.data.data.user.email}${expires}; path=/`;
-      document.cookie = `no_hp=${response.data.data.user.no_hp}${expires}; path=/`;
-      document.cookie = `tanggal_lahir=${response.data.data.user.tanggal_lahir}${expires}; path=/`;
-      document.cookie = `role=${response.data.data.user.role}${expires}; path=/`;
-      document.cookie = `role_name=${response.data.data.user.role_name}${expires}; path=/`;
-      
-      // Redirect berdasarkan role
-      if (response.data.data.user.role === 0) {
+      // Helper function to set cookies with options
+      const setCookie = (name: string, value: string) => {
+        const cookieValue = `${name}=${value}; expires=${cookieOptions.expires.toUTCString()}; path=${
+          cookieOptions.path
+        }${cookieOptions.secure ? "; Secure" : ""}; SameSite=${
+          cookieOptions.sameSite
+        }`;
+        document.cookie = cookieValue;
+      };
+
+      // Store all user data in cookies
+      Object.entries(user).forEach(([key, value]) => {
+        if (value !== null && value !== undefined) {
+          setCookie(key, String(value));
+        }
+      });
+
+      // Set auth token
+      setCookie("token", token);
+
+      // If user has store data, make separate request to get store details
+      try {
+        const storeResponse = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}/stores/user/${user.id_user}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        if (
+          storeResponse.data.status === "success" &&
+          storeResponse.data.data
+        ) {
+          const storeData = storeResponse.data.data;
+          // Store essential store data in cookies
+          setCookie("store_id", String(storeData.id_toko));
+          setCookie("store_name", storeData.nama_toko);
+          setCookie("store_status", String(storeData.is_active));
+        }
+      } catch (storeError) {
+        console.warn("No store data found for user");
+      }
+
+      // Log stored cookies for debugging (remove in production)
+      if (process.env.NODE_ENV !== "production") {
+        console.log("Stored cookies:", document.cookie);
+      }
+
+      // Redirect based on role
+      if (user.role === 0) {
         router.push("/superadmin");
-      } else if (response.data.data.user.role === 1) {
+      } else if (user.role === 1) {
         router.push("/admin");
       } else {
         router.push("/user");
       }
-    } catch (err) {
-      setError("Login gagal. Silakan periksa kredensial Anda.");
+    } catch (err: any) {
+      console.error("Login error:", err);
+      setError(
+        err.response?.data?.message ||
+          "Login gagal. Silakan periksa kredensial Anda."
+      );
     }
   };
 

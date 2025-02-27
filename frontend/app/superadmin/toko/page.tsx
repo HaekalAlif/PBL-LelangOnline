@@ -65,7 +65,7 @@ export default function TokoPage() {
       // Get user ID from cookies
       const userId = document.cookie
         .split("; ")
-        .find((row) => row.startsWith("id="))
+        .find((row) => row.startsWith("id_user="))
         ?.split("=")[1];
 
       if (!userId) {

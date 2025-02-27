@@ -6,9 +6,11 @@ use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Http\Controllers\Barang\BarangController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\Toko\TokoController;
+use App\Http\Controllers\Kategori\KategoriController;
 
 Route::post('/register', [RegisteredUserController::class, 'store'])
     ->middleware('guest')
@@ -52,5 +54,24 @@ Route::prefix('users')->group(function () {
     Route::post('/', [TokoController::class, 'store']);
     Route::get('/', [TokoController::class, 'index']);
     Route::get('/my-store', [TokoController::class, 'myStore']);
+    Route::get('/user/{userId}', [TokoController::class, 'getTokoByUserId']); // Add this new route
+    Route::get('/{userId}/items', [BarangController::class, 'getBarangByToko']); // Add this new route
 });
 
+// Kategori Management Routes
+Route::prefix('categories')->group(function () {
+    Route::get('/', [KategoriController::class, 'index']);
+    Route::post('/', [KategoriController::class, 'store']);
+    Route::get('/{id}', [KategoriController::class, 'show']);
+    Route::put('/{id}', [KategoriController::class, 'update']);
+    Route::delete('/{id}', [KategoriController::class, 'destroy']);
+});
+
+// Barang Management Routes
+Route::prefix ('barang')->group(function ()  {
+   Route::get('/', [BarangController::class, 'index']);
+    Route::post('/', [BarangController::class, 'store']);
+    Route::get('/{id}', [BarangController::class, 'show']);
+    Route::put('/{id}', [BarangController::class, 'update']);
+    Route::delete('/{id}', [BarangController::class, 'destroy']);
+});

@@ -140,4 +140,36 @@ class TokoController extends Controller
             ], 500);
         }
     }
+
+    public function getTokoByUserId($userId)
+    {
+        try {
+            $toko = Toko::where('id_user', $userId)
+                ->where('is_deleted', false)
+                ->first();
+
+            if (!$toko) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Store not found for this user'
+                ], 404);
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $toko
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error fetching store by user ID:', [
+                'error' => $e->getMessage(),
+                'user_id' => $userId
+            ]);
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to fetch store data'
+            ], 500);
+        }
+    }
 }
