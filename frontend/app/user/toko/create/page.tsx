@@ -27,6 +27,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 
+// Add cookie utility function
+const setCookie = (name: string, value: string) => {
+  document.cookie = `${name}=${value}; path=/`;
+};
+
 const formSchema = z.object({
   nama_toko: z.string().min(3, "Store name must be at least 3 characters"),
   deskripsi: z.string().min(10, "Description must be at least 10 characters"),
@@ -49,7 +54,6 @@ export default function CreateTokoPage() {
       kontak: "",
     },
   });
-
 
   const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true);
@@ -75,11 +79,17 @@ export default function CreateTokoPage() {
         is_deleted: false,
       };
 
-      console.log("Submitting data:", completeData); 
+      console.log("Submitting data:", completeData);
 
       const response = await axios.post("/stores", completeData);
 
       if (response.data.status === "success") {
+        // Store the new store data in cookies
+        const storeData = response.data.data;
+        setCookie("store_id", String(storeData.id_toko));
+        setCookie("store_name", storeData.nama_toko);
+        setCookie("store_status", String(storeData.is_active));
+
         toast.success("Store created successfully");
         router.push("/user/toko");
         router.refresh();

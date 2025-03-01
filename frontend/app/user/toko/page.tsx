@@ -50,44 +50,53 @@ const TokoPage = () => {
           .find((row) => row.startsWith("id_user="))
           ?.split("=")[1];
 
+        const storeId = document.cookie
+          .split("; ")
+          .find((row) => row.startsWith("store_id="))
+          ?.split("=")[1];
+
         if (!userId) {
           router.push("/login");
           return;
         }
 
-        console.log("Fetching with userId:", userId); // Debug log
+        console.log("Fetching with userId:", userId);
+        console.log("Store ID from cookie:", storeId);
 
         // Fetch toko data
         const tokoResponse = await axios.get("/stores/my-store", {
           headers: { "X-User-Id": userId },
         });
 
-        console.log("Toko Response:", tokoResponse.data); // Debug log
+        console.log("Toko Response:", tokoResponse.data);
 
         if (tokoResponse.data.status === "success" && tokoResponse.data.data) {
           setToko(tokoResponse.data.data);
 
-          // Get the toko ID
-          const tokoId = tokoResponse.data.data.id;
-          console.log("Fetching items for toko ID:", tokoId); // Debug log
+          if (storeId) {
+            try {
+              // Fetch barang data using store_id from cookie
+              const barangResponse = await axios.get(
+                `/stores/${storeId}/items`
+              );
+              console.log("Barang Response:", barangResponse.data);
 
-          try {
-            // Fetch barang data with proper error handling
-            const barangResponse = await axios.get(`/stores/${userId}/items`);
-            console.log("Barang Response:", barangResponse.data); // Debug log
-
-            if (
-              barangResponse.data.status === "success" &&
-              Array.isArray(barangResponse.data.data)
-            ) {
-              setBarangList(barangResponse.data.data);
-            } else {
-              console.error("Invalid barang data format:", barangResponse.data);
+              if (
+                barangResponse.data.status === "success" &&
+                Array.isArray(barangResponse.data.data)
+              ) {
+                setBarangList(barangResponse.data.data);
+              } else {
+                console.error(
+                  "Invalid barang data format:",
+                  barangResponse.data
+                );
+                setBarangList([]);
+              }
+            } catch (barangError) {
+              console.error("Error fetching barang:", barangError);
               setBarangList([]);
             }
-          } catch (barangError) {
-            console.error("Error fetching barang:", barangError);
-            setBarangList([]);
           }
         }
       } catch (error: any) {

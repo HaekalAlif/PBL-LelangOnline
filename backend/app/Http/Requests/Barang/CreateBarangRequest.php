@@ -21,7 +21,7 @@ class CreateBarangRequest extends FormRequest
             'harga_awal' => 'required|numeric|min:0',
             'gambar_barang' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
             'grade' => 'required|string|in:A,B,C,D',
-            'status_barang' => 'nullable|string|in:Tersedia,Dalam Lelang,Terjual',
+            'status_barang' => 'nullable|string|in:tersedia,dalam_lelang,terjual',
             'kondisi_detail' => 'required|string',
             'berat_barang' => 'required|numeric|min:0',
             'dimensi' => 'required|string',

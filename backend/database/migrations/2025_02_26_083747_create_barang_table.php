@@ -10,9 +10,9 @@ return new class extends Migration
     public function up()
     {
         Schema::create('barang', function (Blueprint $table) {
-            $table->integer('id_barang')->autoIncrement();
-            $table->integer('id_kategori');
-            $table->integer('id_toko');
+            $table->bigIncrements('id_barang');
+            $table->unsignedBigInteger('id_kategori');  // This now matches kategori's id_kategori
+            $table->unsignedBigInteger('id_toko');
             $table->string('nama_barang');
             $table->text('deskripsi_barang')->nullable();
             $table->double('harga_awal');
@@ -25,8 +25,8 @@ return new class extends Migration
             $table->boolean('is_deleted')->default(false);
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->timestamp('updated_at')->nullable()->useCurrentOnUpdate();
-            $table->integer('created_by')->nullable();
-            $table->integer('updated_by')->nullable();
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->unsignedBigInteger('updated_by')->nullable();
 
             $table->foreign('id_kategori')->references('id_kategori')->on('kategori')->onDelete('cascade');
             $table->foreign('id_toko')->references('id_toko')->on('toko')->onDelete('cascade');

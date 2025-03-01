@@ -1,4 +1,3 @@
-php
 <?php
 
 use Illuminate\Database\Migrations\Migration;
@@ -11,14 +10,14 @@ return new class extends Migration
     public function up()
     {
         Schema::create('kategori', function (Blueprint $table) {
-            $table->integer('id_kategori')->autoIncrement();
+            $table->bigIncrements('id_kategori');
             $table->string('nama_kategori');
             $table->boolean('is_active')->default(true);
             $table->boolean('is_deleted')->default(false);
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->timestamp('updated_at')->nullable()->useCurrentOnUpdate();
-            $table->integer('created_by')->nullable();
-            $table->integer('updated_by')->nullable();
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->unsignedBigInteger('updated_by')->nullable();
 
             $table->foreign('created_by')->references('id_user')->on('users')->onDelete('set null');
             $table->foreign('updated_by')->references('id_user')->on('users')->onDelete('set null');

@@ -41,6 +41,10 @@ const menuGroups = [
     label: "Store",
     items: [{ title: "Toko", url: "/user/toko", icon: Store, badge: "" }],
   },
+  {
+    label: "Auction",
+    items: [{ title: "Lelang", url: "/user/lelang", icon: Store, badge: "" }],
+  },
 ];
 
 export function AppSidebar() {

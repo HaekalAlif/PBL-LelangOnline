@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import axios from "@/lib/axios";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -37,73 +38,99 @@ import Image from "next/image";
 import { Loader2 } from "lucide-react";
 
 interface Category {
-  id_kategori: number; // Change this from id to id_kategori
+  id_kategori: number;
   nama_kategori: string;
+}
+
+interface Barang {
+  id_barang: number;
+  nama_barang: string;
+  id_kategori: number;
+  deskripsi_barang: string;
+  harga_awal: number;
+  grade: string;
+  kondisi_detail: string;
+  berat_barang: number;
+  dimensi: string;
+  gambar_barang: string;
+  gambar_barang_url: string; // Add this new property
 }
 
 const formSchema = z.object({
   nama_barang: z.string().min(3, "Nama barang minimal 3 karakter"),
   id_kategori: z.string().min(1, "Kategori harus dipilih"),
-  id_toko: z.string().optional(),
+  id_toko: z.string().optional(), // Add this
   deskripsi_barang: z.string().min(10, "Deskripsi minimal 10 karakter"),
   harga_awal: z.string().min(1, "Harga awal harus diisi"),
   grade: z.string().min(1, "Grade harus dipilih"),
-  status_barang: z.string().optional(),
   kondisi_detail: z.string().min(10, "Kondisi detail minimal 10 karakter"),
   berat_barang: z.string().min(1, "Berat barang harus diisi"),
   dimensi: z.string().min(1, "Dimensi harus diisi"),
   gambar_barang: z
-    .custom<File>((value) => value instanceof File, {
-      message: "Gambar harus diupload",
-    })
+    .custom<File>(
+      (value) => value instanceof File || typeof value === "string",
+      {
+        message: "Gambar harus diupload",
+      }
+    )
     .optional(),
 });
 
-type FormValues = z.infer<typeof formSchema>;
-
-export default function CreateBarang() {
+export default function EditBarang({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const resolvedParams = React.use(params);
   const router = useRouter();
   const [categories, setCategories] = useState<Category[]>([]);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [barang, setBarang] = useState<Barang | null>(null);
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+  });
 
   useEffect(() => {
-    const fetchCategories = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axios.get("/categories");
-        console.log("Categories response:", response.data); 
-        setCategories(response.data.data);
+        const [categoriesResponse, barangResponse] = await Promise.all([
+          axios.get("/categories"),
+          axios.get(`/barang/${resolvedParams.id}`),
+        ]);
+
+        setCategories(categoriesResponse.data.data);
+        const barangData = barangResponse.data.data;
+        setBarang(barangData);
+        // Use gambar_barang_url directly from API
+        setImagePreview(barangData.gambar_barang_url);
+
+        // Set form values
+        form.reset({
+          nama_barang: barangData.nama_barang,
+          id_kategori: String(barangData.id_kategori),
+          deskripsi_barang: barangData.deskripsi_barang,
+          harga_awal: String(barangData.harga_awal),
+          grade: barangData.grade,
+          kondisi_detail: barangData.kondisi_detail,
+          berat_barang: String(barangData.berat_barang),
+          dimensi: barangData.dimensi,
+          gambar_barang: barangData.gambar_barang,
+        });
       } catch (error) {
-        console.error("Error fetching categories:", error);
-        toast.error("Failed to load categories");
+        console.error("Error fetching data:", error);
+        toast.error("Gagal memuat data");
       }
     };
 
-    fetchCategories();
-  }, []);
-
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      nama_barang: "",
-      id_kategori: "",
-      deskripsi_barang: "",
-      harga_awal: "",
-      grade: "",
-      kondisi_detail: "",
-      berat_barang: "",
-      dimensi: "",
-    },
-  });
+    fetchData();
+  }, [resolvedParams.id, form]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      form.setValue("gambar_barang", file, {
-        shouldValidate: true,
-        shouldDirty: true,
-        shouldTouch: true,
-      });
+      form.setValue("gambar_barang", file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
@@ -112,7 +139,7 @@ export default function CreateBarang() {
     }
   };
 
-  const onSubmit = async (values: FormValues) => {
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
     try {
       const cookies = document.cookie.split("; ");
@@ -133,6 +160,10 @@ export default function CreateBarang() {
       const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
+          if (key === "gambar_barang" && typeof value === "string") {
+            // Skip if it's the existing image URL
+            return;
+          }
           if (key === "harga_awal" || key === "berat_barang") {
             formData.append(key, String(Number(value)));
           } else {
@@ -142,38 +173,28 @@ export default function CreateBarang() {
       });
 
       formData.append("id_toko", storeId);
-      formData.append("created_by", userId);
+      formData.append("updated_by", userId);
       formData.append("status_barang", "tersedia");
 
-      console.log(values);
-
-      const response = await axios.post("/barang", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const response = await axios.post(
+        `/barang/${resolvedParams.id}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            "X-HTTP-Method-Override": "PUT",
+          },
+        }
+      );
 
       if (response.data.status === "success") {
-        toast.success("Barang berhasil ditambahkan");
+        toast.success("Barang berhasil diperbarui");
         router.push("/user/toko");
         router.refresh();
       }
     } catch (error: any) {
       console.error("API Error:", error.response?.data);
-
-      if (error.response?.status === 401) {
-        toast.error("Silakan login terlebih dahulu");
-        router.push("/login");
-      } else if (error.response?.status === 422) {
-        const errors = error.response.data.errors;
-        Object.keys(errors).forEach((key) => {
-          toast.error(errors[key][0]);
-        });
-      } else {
-        toast.error(
-          error.response?.data?.message || "Gagal menambahkan barang"
-        );
-      }
+      toast.error(error.response?.data?.message || "Gagal memperbarui barang");
     } finally {
       setIsSubmitting(false);
     }
@@ -183,14 +204,15 @@ export default function CreateBarang() {
     <div className="container mx-auto py-10">
       <Card className="max-w-2xl mx-auto">
         <CardHeader>
-          <CardTitle>Tambah Barang Baru</CardTitle>
+          <CardTitle>Edit Barang</CardTitle>
           <CardDescription>
-            Lengkapi informasi barang yang akan dilelang
+            Perbarui informasi barang yang akan dilelang
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              {/* Form fields are the same as create page */}
               <FormField
                 control={form.control}
                 name="nama_barang"
@@ -221,15 +243,14 @@ export default function CreateBarang() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {categories &&
-                          categories.map((category) => (
-                            <SelectItem
-                              key={category.id_kategori}
-                              value={String(category.id_kategori)}
-                            >
-                              {category.nama_kategori}
-                            </SelectItem>
-                          ))}
+                        {categories.map((category) => (
+                          <SelectItem
+                            key={category.id_kategori}
+                            value={String(category.id_kategori)}
+                          >
+                            {category.nama_kategori}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -368,7 +389,7 @@ export default function CreateBarang() {
                       />
                     </FormControl>
                     <FormDescription>
-                      Upload gambar dengan format JPG, PNG, atau WEBP
+                      Upload gambar baru untuk mengganti gambar yang ada
                     </FormDescription>
                     <FormMessage />
                     {imagePreview && (
@@ -389,7 +410,7 @@ export default function CreateBarang() {
                 {isSubmitting && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
-                {isSubmitting ? "Menyimpan..." : "Simpan Barang"}
+                {isSubmitting ? "Menyimpan..." : "Perbarui Barang"}
               </Button>
             </form>
           </Form>

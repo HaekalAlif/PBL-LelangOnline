@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\Toko\TokoController;
 use App\Http\Controllers\Kategori\KategoriController;
+use App\Http\Controllers\Lelang\LelangController;
+use App\Http\Controllers\Penawaran\PenawaranController;
 
 Route::post('/register', [RegisteredUserController::class, 'store'])
     ->middleware('guest')
@@ -55,7 +57,7 @@ Route::prefix('users')->group(function () {
     Route::get('/', [TokoController::class, 'index']);
     Route::get('/my-store', [TokoController::class, 'myStore']);
     Route::get('/user/{userId}', [TokoController::class, 'getTokoByUserId']); // Add this new route
-    Route::get('/{userId}/items', [BarangController::class, 'getBarangByToko']); // Add this new route
+    Route::get('/{TokoId}/items', [BarangController::class, 'getBarangByToko']); // Add this new route
 });
 
 // Kategori Management Routes
@@ -69,9 +71,23 @@ Route::prefix('categories')->group(function () {
 
 // Barang Management Routes
 Route::prefix ('barang')->group(function ()  {
-   Route::get('/', [BarangController::class, 'index']);
+    Route::get('/', [BarangController::class, 'index']);
     Route::post('/', [BarangController::class, 'store']);
-    Route::get('/{id}', [BarangController::class, 'show']);
+    Route::get('/user/{userId}', [BarangController::class, 'getBarangByUser']);
+    Route::get('/{id}', [BarangController::class, 'getBarangById']);
+    Route::get('/toko/{tokoId}/user/{userId}', [BarangController::class, 'getBarangByTokoAndUser']);
     Route::put('/{id}', [BarangController::class, 'update']);
     Route::delete('/{id}', [BarangController::class, 'destroy']);
 });
+
+// Lelang Management Routes
+Route::prefix('lelang')->group(function () {
+    Route::get('/', [LelangController::class, 'index'])->name('lelang.index');
+    Route::post('/', [LelangController::class, 'store'])->name('lelang.store');
+    Route::get('/{id}', [LelangController::class, 'show'])->name('lelang.show');
+    Route::put('/{id}', [LelangController::class, 'update'])->name('lelang.update');
+    Route::delete('/{id}', [LelangController::class, 'destroy'])->name('lelang.destroy');
+    Route::post('/{id}/bid', [PenawaranController::class, 'store'])->name('lelang.bid.store');
+    Route::get('/{id}/bids', [PenawaranController::class, 'getByLelang'])->name('lelang.bids');
+});
+
