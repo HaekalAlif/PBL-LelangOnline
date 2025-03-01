@@ -31,7 +31,7 @@ import { useRouter } from "next/navigation";
 import axios from "@/lib/axios";
 
 interface Toko {
-  id: number;
+  id_toko: number; // Changed from id to id_toko to match backend
   id_user: number;
   username: string; // Owner's username
   nama_toko: string;
@@ -192,7 +192,7 @@ export default function TokoPage() {
               </TableRow>
             ) : (
               toko.map((store) => (
-                <TableRow key={store.id}>
+                <TableRow key={store.id_toko}>
                   <TableCell className="font-medium">
                     {store.nama_toko}
                   </TableCell>
@@ -222,14 +222,18 @@ export default function TokoPage() {
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem
                           onClick={() =>
-                            router.push(`/superadmin/toko/${store.id}/detail`)
+                            router.push(
+                              `/superadmin/toko/${store.id_toko}/detail`
+                            )
                           }
                         >
                           View Details
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() =>
-                            router.push(`/superadmin/toko/${store.id}/edit`)
+                            router.push(
+                              `/superadmin/toko/${store.id_toko}/edit`
+                            )
                           }
                         >
                           Edit

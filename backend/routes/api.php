@@ -52,12 +52,13 @@ Route::prefix('users')->group(function () {
 });
 
 // Store Management Routes
- Route::prefix('stores')->group(function () {
+Route::prefix('stores')->group(function () {
     Route::post('/', [TokoController::class, 'store']);
     Route::get('/', [TokoController::class, 'index']);
     Route::get('/my-store', [TokoController::class, 'myStore']);
     Route::get('/user/{userId}', [TokoController::class, 'getTokoByUserId']); // Add this new route
     Route::get('/{TokoId}/items', [BarangController::class, 'getBarangByToko']); // Add this new route
+    Route::get('/{id}', [TokoController::class, 'show']); // Add this new route
 });
 
 // Kategori Management Routes

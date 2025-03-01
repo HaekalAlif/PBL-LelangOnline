@@ -163,10 +163,49 @@ export default function BarangPage() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-muted-foreground">
-                Active Items
+                Barang Tersedia
               </p>
               <h3 className="text-2xl font-bold">
-                {barang.filter((b) => b.is_active).length}
+                {
+                  barang.filter((item) => item.status_barang === "tersedia")
+                    .length
+                }
+              </h3>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="flex items-center p-6">
+            <div className="rounded-full bg-green-100 p-3">
+              <Store className="h-6 w-6 text-green-600" />
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-muted-foreground">
+                Barang dalam lelang
+              </p>
+              <h3 className="text-2xl font-bold">
+                {
+                  barang.filter((item) => item.status_barang === "lelang")
+                    .length
+                }
+              </h3>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="flex items-center p-6">
+            <div className="rounded-full bg-green-100 p-3">
+              <Store className="h-6 w-6 text-green-600" />
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-muted-foreground">
+                Barang Terjual
+              </p>
+              <h3 className="text-2xl font-bold">
+                {
+                  barang.filter((item) => item.status_barang === "terjual")
+                    .length
+                }
               </h3>
             </div>
           </CardContent>
@@ -223,7 +262,7 @@ export default function BarangPage() {
             <SelectGroup>
               <SelectItem value="all">All Status</SelectItem>
               <SelectItem value="tersedia">Tersedia</SelectItem>
-              <SelectItem value="dalam_lelang">Dalam Lelang</SelectItem>
+              <SelectItem value="lelang">Dalam Lelang</SelectItem>
               <SelectItem value="terjual">Terjual</SelectItem>
             </SelectGroup>
           </SelectContent>
@@ -280,7 +319,7 @@ export default function BarangPage() {
                       />
                       {item.status_barang === "tersedia"
                         ? "Tersedia"
-                        : item.status_barang === "dalam_lelang"
+                        : item.status_barang === "lelang"
                         ? "Dalam Lelang"
                         : "Terjual"}
                     </div>
@@ -302,9 +341,6 @@ export default function BarangPage() {
                           }
                         >
                           View Details
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="text-red-600">
-                          Deactivate
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { InitialAvatar } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -40,6 +40,15 @@ const ProfileCard = () => {
     });
   }, []);
 
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
   if (!mounted) return null;
 
   return (
@@ -49,7 +58,11 @@ const ProfileCard = () => {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="w-full px-2 hover:bg-accent">
               <div className="flex items-center space-x-3">
-                <InitialAvatar username={userInfo.username} />
+                <Avatar>
+                  <AvatarFallback className="bg-primary text-primary-foreground font-medium">
+                    {getInitials(userInfo.username)}
+                  </AvatarFallback>
+                </Avatar>
                 <div className="flex-1 text-left">
                   <p className="font-medium text-sm truncate max-w-[150px]">
                     {userInfo.username}

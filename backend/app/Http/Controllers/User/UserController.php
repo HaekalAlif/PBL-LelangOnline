@@ -101,7 +101,12 @@ class UserController extends Controller
     public function show($id)
     {
         try {
-            $user = User::where('id_user', $id)->where('is_deleted', false)->first();
+            $user = User::with(['store' => function($query) {
+                $query->where('is_deleted', false);
+            }])
+            ->where('id_user', $id)
+            ->where('is_deleted', false)
+            ->first();
             
             if (!$user) {
                 return response()->json([
@@ -110,11 +115,34 @@ class UserController extends Controller
                 ], 404);
             }
 
+            $userData = [
+                'id_user' => $user->id_user,
+                'username' => $user->username,
+                'email' => $user->email,
+                'no_hp' => $user->no_hp,
+                'foto_profil' => $user->foto_profil,
+                'tanggal_lahir' => $user->tanggal_lahir,
+                'role' => $user->role,
+                'poin_reputasi' => $user->poin_reputasi,
+                'is_verified' => (bool) $user->is_verified,
+                'is_active' => (bool) $user->is_active,
+            ];
+
+            // Add store data if exists
+            if ($user->store) {
+                $userData['store'] = [
+                    'id_toko' => $user->store->id_toko,
+                    'nama_toko' => $user->store->nama_toko,
+                ];
+            }
+
             return response()->json([
                 'status' => 'success',
-                'data' => $user
+                'data' => $userData
             ], 200);
+
         } catch (\Exception $e) {
+            \Log::error('User show error: ' . $e->getMessage());
             return response()->json([
                 'status' => 'error',
                 'message' => 'Failed to fetch user',

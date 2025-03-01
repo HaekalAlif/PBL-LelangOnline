@@ -304,7 +304,7 @@ export default function UserPage() {
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem
                           onClick={() =>
-                            router.push(`/superadmin/user/${user.id_user}`)
+                            router.push(`/superadmin/user/${user.id_user}/detail`)
                           }
                         >
                           View Details

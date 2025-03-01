@@ -56,4 +56,9 @@ class User extends Authenticatable
     {
         return self::$roles[$this->role] ?? 'unknown';
     }
+
+    public function store()
+    {
+        return $this->hasOne(Toko::class, 'id_user', 'id_user');
+    }
 }

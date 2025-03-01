@@ -66,12 +66,6 @@ const menuGroups = [
     icon: Gavel,
     items: [
       { title: "Auctions", url: "/superadmin/lelang", icon: Gavel, badge: "" },
-      {
-        title: "Bids",
-        url: "/superadmin/penawaran",
-        icon: ArrowUpDown,
-        badge: "",
-      },
     ],
   },
   {

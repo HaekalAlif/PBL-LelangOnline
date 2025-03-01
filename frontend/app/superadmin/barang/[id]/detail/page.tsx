@@ -8,6 +8,9 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, Trophy, Timer, Users } from "lucide-react";
 
 interface Barang {
   id_barang: number;
@@ -79,6 +82,12 @@ export default function DetailBarang() {
 
   return (
     <div className="container mx-auto p-6">
+      <Link href="/superadmin/barang" className="inline-flex items-center mb-6">
+        <Button variant="outline">
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Kembali ke Daftar Barang
+        </Button>
+      </Link>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Image Section */}
         <Card>
