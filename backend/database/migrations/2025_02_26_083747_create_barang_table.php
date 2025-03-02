@@ -17,8 +17,8 @@ return new class extends Migration
             $table->text('deskripsi_barang')->nullable();
             $table->double('harga_awal');
             $table->string('gambar_barang')->nullable();
-            $table->string('grade')->comment('Grading barang: Seperti Baru, Bekas Layak Pakai, Rusak Ringan, Rusak Berat');
-            $table->enum('status_barang', ['Tersedia', 'Dalam Lelang', 'Terjual'])->default('Tersedia');
+            $table->string('grade');
+            $table->enum('status_barang', ['tersedia', 'dalam_lelang', 'terjual'])->default('tersedia');
             $table->text('kondisi_detail')->nullable();
             $table->decimal('berat_barang', 10, 2);
             $table->string('dimensi')->nullable();

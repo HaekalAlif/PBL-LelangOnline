@@ -72,7 +72,7 @@ export default function PenawaranDetailPage({ params }: DetailPageProps) {
         toast.success("Lelang berhasil diakhiri", {
           description: "Status lelang telah diubah menjadi selesai",
         });
-        fetchData(); // Refresh data
+        fetchData(); 
       }
     } catch (error) {
       console.error("Error ending auction:", error);
@@ -251,7 +251,7 @@ export default function PenawaranDetailPage({ params }: DetailPageProps) {
                 variant="outline"
                 onClick={() => {
                   toast.info("Coming Soon", {
-                    description: "Export feature will be available soon",
+                    description: "Fitur export akan tersedia nanti",
                   });
                 }}
               >

@@ -18,7 +18,7 @@ return new class extends Migration
             $table->double('harga_minimal_bid');
             $table->timestamp('tanggal_mulai');
             $table->timestamp('tanggal_berakhir');
-            $table->enum('status', ['Berlangsung', 'Selesai']);
+            $table->enum('status', ['berlangsung', 'selesai']);
             $table->integer('jumlah_bid')->default(0);
             $table->boolean('is_deleted')->default(false);
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
