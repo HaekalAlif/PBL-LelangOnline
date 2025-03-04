@@ -88,7 +88,7 @@ function CreateLelangForm({
         id_barang: barangId,
         tanggal_mulai: formData.get("tanggal_mulai"),
         tanggal_berakhir: formData.get("tanggal_berakhir"),
-        harga_minimal_bid: Number(formData.get("harga_minimal_bid")), // Get the actual input value
+        harga_minimal_bid: Number(formData.get("harga_minimal_bid")),
         created_by: userId,
       });
 
@@ -333,7 +333,7 @@ export default function BarangDetail({ params }: { params: { id: string } }) {
                         Barang ini siap untuk dilelang
                       </span>
                     )}
-                    {barang.status_barang === "lelang" && (
+                    {barang.status_barang === "dalam_lelang" && (
                       <span className="text-blue-600">
                         Lelang sedang berlangsung
                       </span>
