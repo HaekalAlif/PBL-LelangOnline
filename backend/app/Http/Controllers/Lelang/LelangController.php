@@ -117,7 +117,7 @@ class LelangController extends Controller
             ]);
 
             // Update barang status
-            $barang->update(['status_barang' => 'lelang']);
+            $barang->update(['status_barang' => 'dalam_lelang']);
 
             // Load relationships
             $lelang->load(['barang']);
