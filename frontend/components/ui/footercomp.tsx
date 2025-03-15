@@ -11,11 +11,6 @@ const FooterComp = () => {
           <p className="text-sm mb-4">
             Platform e-commerce terpercaya yang menyediakan berbagai produk berkualitas dengan harga terbaik. Belanja mudah, aman, dan nyaman!
           </p>
-          <div className="flex gap-4">
-            <span className="bg-black px-3 py-1 rounded">(219) 555-0114</span>
-            <span className="bg-black px-3 py-1 rounded">atcu</span>
-            <span className="bg-black px-3 py-1 rounded">Proxy@gmail.com</span>
-          </div>
         </div>
         <div>
           <h3 className="text-lg font-semibold mb-4">Akun Saya</h3>

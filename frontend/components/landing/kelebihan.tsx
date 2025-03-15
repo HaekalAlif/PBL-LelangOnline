@@ -3,11 +3,11 @@
 'use client';
 
 import React from 'react';
-import { FaGavel, FaComments, FaShieldAlt, FaCheckCircle } from 'react-icons/fa';
+import { FaTag, FaComments, FaShieldAlt, FaCheckCircle } from 'react-icons/fa';
 
 const features = [
   {
-    icon: <FaGavel size={40}  />, 
+    icon: <FaTag size={40}  />, 
     title: 'Transparansi Harga', 
     description: 'Harga yang jelas dan transparan untuk semua pembeli.',
     bgColor: 'bg-[#F79E0E]',

@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useRouter } from 'next/navigation'
 
 const categories = [
   'Pakaian', 'Elektronik', 'Motor', 'Mobil', 'Aksesoris', 'Perabotan', 'Olahraga', 'Lain - Lain'
@@ -13,6 +14,11 @@ const products = Array(8).fill({
 });
 
 export default function Rekomendasi() {
+  const router = useRouter() // Pindahkan useRouter ke dalam komponen
+  
+    const handleProduk = () => {
+      router.push('/produk')
+    }
   return (
     <div className="bg-white min-h-screen">
       <h1 className="text-center bg-amber-50 text-4xl font-bold mb-8 h-24 justify-center pt-7">Rekomendasi</h1>
@@ -49,7 +55,7 @@ export default function Rekomendasi() {
         <div className="grid grid-cols-4 gap-6 flex-1">
           {products.map((product, index) => (
             <div key={index} className="bg-white rounded-lg shadow-md overflow-hidden">
-              <img src={product.image} alt={product.name} className="w-full h-72 object-cover" />
+              <img src={product.image} alt={product.name} className="w-full h-72 object-cover rounded-md" />
               <div className="flex justify-between items-center p-2">
                 <div>
                   <h3 className="text-lg font-bold">{product.name}</h3>
@@ -62,7 +68,7 @@ export default function Rekomendasi() {
         </div>
       </div>
 
-      <p className="text-right text-[#F79E0E] mt-6 mx-48">Lihat Semua</p>
+      <p onClick={handleProduk} className="text-right text-[#F79E0E] mt-6 mx-48 cursor-pointer">Lihat Semua</p>
       <hr className="border-b-1 border-black mx-24 mt-6" />
     </div>
   );

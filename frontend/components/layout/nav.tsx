@@ -10,6 +10,9 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import Searchbar from '../ui/searchbar'
+import { useRouter } from 'next/navigation'
+
+
 
 
 const MenuIcon = () => (
@@ -64,31 +67,7 @@ const ChevronDownIcon = () => (
   </svg>
 )
 
-const SearchIcon = () => (
-  <svg
-    width="20"
-    height="20"
-    viewBox="0 0 20 20"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    aria-hidden="true"
-  >
-    <path
-      d="M9.16667 15.8333C12.8486 15.8333 15.8333 12.8486 15.8333 9.16667C15.8333 5.48477 12.8486 2.5 9.16667 2.5C5.48477 2.5 2.5 5.48477 2.5 9.16667C2.5 12.8486 5.48477 15.8333 9.16667 15.8333Z"
-      stroke="#030303"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M17.4999 17.5L13.8749 13.875"
-      stroke="#030303"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-)
+
 
 const NotificationIcon = () => (
   <svg
@@ -127,6 +106,17 @@ const CartIcon = () => (
 )
 
 export function Navigation() {
+
+  const router = useRouter() // Pindahkan useRouter ke dalam komponen
+
+  const handleLogin = () => {
+    router.push('/login')
+  }
+
+  const handleRegister = () => {
+    router.push('/register')
+  }
+
   const [isSearchFocused, setIsSearchFocused] = React.useState(false)
 
   return (
@@ -137,11 +127,12 @@ export function Navigation() {
     >
       <div className="flex gap-8 justify-between items-center px-12 py-3 mx-auto max-w-[1920px] max-sm:py-2">
         {/* Masukkan Kodingan Logo Disini*/}
+        <a href="/" className="font-bold">E Commerce</a>
 
         <div className="flex flex-1 gap-4 items-center max-sm:hidden">
           <Select>
-            <SelectTrigger className="w-[180px] h-[55px]">
-              <SelectValue placeholder="Semua Kategori" />
+            <SelectTrigger className="w-[180px] h-[40px] rounded-xl">
+              <SelectValue placeholder="Semua Kategori" className="text-white" />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
@@ -154,51 +145,33 @@ export function Navigation() {
             </SelectContent>
           </Select>
 
-          <div className="flex flex-1 h-14 rounded-md border border-neutral-400">
-            <div className="flex flex-1 gap-2 items-center px-4">
-              <SearchIcon />
-              <input
-                type="text"
-                placeholder="Cari"
-                className="flex-1 text-base border-[nonepx] text-stone-900"
-                aria-label="Search products"
-                onFocus={() => setIsSearchFocused(true)}
-                onBlur={() => setIsSearchFocused(false)}
-              />
-            </div>
-            <button
-              className="h-14 text-sm font-semibold text-white rounded-md bg-[linear-gradient(180deg,#F79E0E_0%,#F0B639_100%)] w-[123px]"
-              type="submit"
-              aria-label="Search"
-            >
-              Cari
-            </button>
+          <div className="flex flex-1 h-14 rounded-md ">
+            <Searchbar/>
           </div>
         </div>
 
         <div className="flex gap-6 items-center max-sm:ml-auto">
           <button
             aria-label="Notifications"
-            className="focus:outline-none focus:ring-2 focus:ring-amber-400 rounded-full"
+            
           >
             <NotificationIcon />
           </button>
 
           <button
             aria-label="Shopping cart"
-            className="focus:outline-none focus:ring-2 focus:ring-amber-400 rounded-full"
           >
             <CartIcon />
           </button>
 
-          <button
+          <button onClick={handleLogin}
             className="h-14 text-sm font-semibold text-amber-400 rounded-md border-2 border-amber-500 w-[123px]"
             type="button"
           >
             Masuk
           </button>
 
-          <button
+          <button onClick={handleRegister}
             className="h-14 text-sm font-semibold text-white rounded-md bg-[linear-gradient(180deg,#F3AC27_0%,#F5A71E_100%)] w-[123px]"
             type="button"
           >
